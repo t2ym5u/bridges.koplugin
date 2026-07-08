@@ -23,7 +23,7 @@ local Size            = require("ui/size")
 local UIManager       = require("ui/uimanager")
 local VerticalGroup   = require("ui/widget/verticalgroup")
 local VerticalSpan    = require("ui/widget/verticalspan")
-local _               = require("gettext")
+local _               = require("i18n")
 local T               = require("ffi/util").template
 
 local ScreenBase     = lrequire_common("screen_base")
@@ -264,15 +264,27 @@ function BridgesScreen:onCheck()
 end
 
 function BridgesScreen:showRulesHint()
-    self:showMessage(_(
-        "Bridges (Hashiwokakero) rules:\n" ..
-        "Connect islands with horizontal/vertical bridges.\n" ..
-        "Each island's number = total bridges connected to it.\n" ..
-        "At most 2 bridges between any pair. Bridges cannot cross.\n" ..
-        "All islands must form one connected group.\n\n" ..
-        "Tap an island to select, then tap another island\n" ..
-        "in the same row or column to toggle bridges (0\xE2\x86\x921\xE2\x86\x922\xE2\x86\x920)."
-    ), 12)
+    if _.lang() == "fr" then
+        self:showMessage(
+            "Ponts (Hashiwokakero) :\n" ..
+            "Reliez les îles par des ponts horizontaux/verticaux.\n" ..
+            "Le chiffre d'une île = nombre de ponts qui s'y connectent.\n" ..
+            "Maximum 2 ponts entre deux îles. Les ponts ne se croisent pas.\n" ..
+            "Toutes les îles doivent former un seul groupe connecté.\n\n" ..
+            "Appuyez sur une île pour la sélectionner, puis sur une autre île\n" ..
+            "dans la même ligne ou colonne pour alterner les ponts (0\xE2\x86\x921\xE2\x86\x922\xE2\x86\x920)."
+        , 12)
+    else
+        self:showMessage(_(
+            "Bridges (Hashiwokakero) rules:\n" ..
+            "Connect islands with horizontal/vertical bridges.\n" ..
+            "Each island's number = total bridges connected to it.\n" ..
+            "At most 2 bridges between any pair. Bridges cannot cross.\n" ..
+            "All islands must form one connected group.\n\n" ..
+            "Tap an island to select, then tap another island\n" ..
+            "in the same row or column to toggle bridges (0\xE2\x86\x921\xE2\x86\x922\xE2\x86\x920)."
+        ), 12)
+    end
 end
 
 function BridgesScreen:openGridMenu()
