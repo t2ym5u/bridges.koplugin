@@ -47,7 +47,7 @@ Rules:
 • Bridges cannot cross each other.
 • All islands must form one connected network.
 
-Tap between two islands to draw a bridge. Tap again for a double bridge. Tap a third time to remove it.
+Tap an island to select it, then tap another island in the same row or column to toggle bridges between them (0→1→2→0).
 ]])
 
 local GAME_RULES_FR = [[
@@ -62,7 +62,7 @@ Règles :
 • Les ponts ne peuvent pas se croiser.
 • Toutes les îles doivent former un réseau connecté unique.
 
-Appuyez entre deux îles pour tracer un pont. Appuyez à nouveau pour un double pont. Un troisième appui le supprime.
+Appuyez sur une île pour la sélectionner, puis sur une autre île de la même ligne ou colonne pour alterner les ponts entre elles (0→1→2→0).
 ]]
 
 local BridgesScreen = ScreenBase:extend{}
@@ -102,32 +102,22 @@ function BridgesScreen:buildLayout()
         and math.max(right_panel_width - Size.span.horizontal_default, 100)
         or  math.floor(sw * 0.9)
 
-    local top_buttons = ButtonTable:new{
-        shrink_unneeded_width = true,
-        width   = button_width,
-        buttons = {
-            {
-                { text = _("New"),  callback = function() self:onNewGame() end },
-                { id = "grid_button", text = self:getGridButtonText(),
-                  callback = function() self:openGridMenu() end },
-                { id = "diff_button", text = self:getDiffButtonText(),
-                  callback = function() self:openDifficultyMenu() end },
-                { text = _("Check"), callback = function() self:onCheck() end },
-                self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
-                self:makeCloseButtonConfig(),
-            },
-        },
-    }
-    self.grid_button = top_buttons:getButtonById("grid_button")
-    self.diff_button = top_buttons:getButtonById("diff_button")
+    local title_bar = self:buildTitleBar(_("Bridges"), function()
+        return {
+            { text = _("New game"),            callback = function() self:onNewGame() end },
+            { text = self:getGridButtonText(), callback = function() self:openGridMenu() end },
+            { text = self:getDiffButtonText(), callback = function() self:openDifficultyMenu() end },
+            self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
+        }
+    end)
 
     local bottom_buttons = ButtonTable:new{
         shrink_unneeded_width = true,
         width   = button_width,
         buttons = {
             {
+                { text = _("Check"), callback = function() self:onCheck() end },
                 { text = _("Reset"), callback = function() self:onReset() end },
-                { text = _("Rules"), callback = function() self:showRulesHint() end },
             },
         },
     }
@@ -135,33 +125,26 @@ function BridgesScreen:buildLayout()
     if is_landscape then
         local right_panel = VerticalGroup:new{
             align = "center",
-            top_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_large },
             self.status_text,
             VerticalSpan:new{ width = Size.span.vertical_large },
             bottom_buttons,
         }
-        self.layout = HorizontalGroup:new{
+        local content = HorizontalGroup:new{
             align = "center",
             board_frame,
             HorizontalSpan:new{ width = Size.span.horizontal_default },
             right_panel,
         }
+        self:buildLandscapeLayout(title_bar, content)
     else
-        self.layout = VerticalGroup:new{
+        local content = VerticalGroup:new{
             align = "center",
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            top_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_large },
             board_frame,
             VerticalSpan:new{ width = Size.span.vertical_large },
             self.status_text,
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            bottom_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_large },
         }
+        self:buildPortraitLayout(title_bar, content, bottom_buttons)
     end
-    self[1] = self.layout
     self:updateStatus()
 end
 
@@ -261,30 +244,6 @@ function BridgesScreen:onCheck()
         self:updateStatus(T(_("Islands satisfied: %1/%2"), ok, total))
     end
     self.board_widget:refresh()
-end
-
-function BridgesScreen:showRulesHint()
-    if _.lang() == "fr" then
-        self:showMessage(
-            "Ponts (Hashiwokakero) :\n" ..
-            "Reliez les îles par des ponts horizontaux/verticaux.\n" ..
-            "Le chiffre d'une île = nombre de ponts qui s'y connectent.\n" ..
-            "Maximum 2 ponts entre deux îles. Les ponts ne se croisent pas.\n" ..
-            "Toutes les îles doivent former un seul groupe connecté.\n\n" ..
-            "Appuyez sur une île pour la sélectionner, puis sur une autre île\n" ..
-            "dans la même ligne ou colonne pour alterner les ponts (0\xE2\x86\x921\xE2\x86\x922\xE2\x86\x920)."
-        , 12)
-    else
-        self:showMessage(_(
-            "Bridges (Hashiwokakero) rules:\n" ..
-            "Connect islands with horizontal/vertical bridges.\n" ..
-            "Each island's number = total bridges connected to it.\n" ..
-            "At most 2 bridges between any pair. Bridges cannot cross.\n" ..
-            "All islands must form one connected group.\n\n" ..
-            "Tap an island to select, then tap another island\n" ..
-            "in the same row or column to toggle bridges (0\xE2\x86\x921\xE2\x86\x922\xE2\x86\x920)."
-        ), 12)
-    end
 end
 
 function BridgesScreen:openGridMenu()
