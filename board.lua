@@ -304,9 +304,11 @@ function BridgesBoard:tapBridge(i1, i2)
     -- normalise
     if i1 > i2 then i1, i2 = i2, i1 end
 
-    -- Find the bridge slot
+    -- Find the bridge slot. self.bridges entries preserve whatever i1/i2
+    -- order they were built in (not necessarily i1<i2), so this must check
+    -- both orderings just like the solution-max lookup below does.
     for _, b in ipairs(self.bridges) do
-        if b.i1 == i1 and b.i2 == i2 then
+        if (b.i1 == i1 and b.i2 == i2) or (b.i1 == i2 and b.i2 == i1) then
             -- find solution max
             local sol_count = 0
             for _, sb in ipairs(self.solution_bridges) do
@@ -316,7 +318,7 @@ function BridgesBoard:tapBridge(i1, i2)
                 end
             end
             local max_allowed = math.min(2, sol_count)
-            b.count = (b.count % (max_allowed + 1))
+            b.count = (b.count + 1) % (max_allowed + 1)
             -- If max_allowed is 0 (bridge not in solution), clamp to 0
             if max_allowed == 0 then b.count = 0 end
             return true
