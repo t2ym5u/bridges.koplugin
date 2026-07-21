@@ -118,7 +118,7 @@ function BridgesBoard:generate(difficulty)
     local n = self.n
     math.randomseed(os.time() + math.random(1000))
 
-    for _attempt = 1, 20 do
+    for _attempt = 1, 40 do
         local islands, sol_bridges = self:_tryGenerate(n)
         if islands then
             self.islands          = islands
@@ -140,8 +140,12 @@ function BridgesBoard:_tryGenerate(n)
     local grid = emptyGrid(n, n, 0)  -- 0=empty, positive=island index
     local islands = {}
 
-    local min_islands = 8
-    local max_islands = math.min(14, math.floor(n * n / 4))
+    -- Island count must scale with grid area: too sparse and islands stop
+    -- sharing rows/columns, so the Prim's spanning-tree step below finds no
+    -- edges and the whole attempt is discarded (this was silently pushing
+    -- larger boards to the trivial 2-island fallback most of the time).
+    local min_islands = math.max(8, math.floor(n * n * 0.22))
+    local max_islands = math.max(min_islands, math.floor(n * n * 0.30))
     local target = math.random(min_islands, max_islands)
 
     local candidates = {}
