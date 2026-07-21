@@ -177,7 +177,7 @@ function BridgesBoardWidget:paintTo(bb, x, y)
 
         local m = RenderText:sizeUtf8Text(0, ir * 2, self.num_face, label, true, false)
         local tx = cx - math.floor(m.x / 2)
-        local ty = cy + math.floor((m.y_top - m.y_bottom) / 2) - m.y_top
+        local ty = cy - math.floor((m.y_bottom - m.y_top) / 2)
         RenderText:renderUtf8Text(bb, tx, ty, self.num_face, label, true, false, C_ISLAND_NUM)
     end
 end
