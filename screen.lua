@@ -102,6 +102,13 @@ function BridgesScreen:buildLayout()
         and math.max(right_panel_width - Size.span.horizontal_default, 100)
         or  math.floor(sw * 0.9)
 
+    -- The status line can get long ("7×7 · Hard · 3/14 islands done"). In
+    -- portrait it sits directly alongside board_frame in the same
+    -- VerticalGroup, which centers each child against the widest one --
+    -- unbounded, a long status string overflows past the screen edge
+    -- instead of wrapping, getting cut off rather than centered.
+    self.status_text:setMaxWidth(is_landscape and button_width or board_frame_size)
+
     local title_bar = self:buildTitleBar(_("Bridges"), function()
         return {
             { text = _("New game"),            callback = function() self:onNewGame() end },
