@@ -4,7 +4,7 @@ A Bridges (Hashi) puzzle plugin for [KOReader](https://github.com/koreader/korea
 
 ## Screenshot
 
-*(Screenshot to be added.)*
+![Screenshot](images/bridges.png)
 
 ## Rules
 
