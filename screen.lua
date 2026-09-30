@@ -67,6 +67,17 @@ Appuyez sur une île pour la sélectionner, puis sur une autre île de la même 
 
 local BridgesScreen = ScreenBase:extend{}
 
+-- The unit is a bridge between two islands, so a hint names both ends rather
+-- than one cell. A wrong bridge cannot exist here -- tapBridge clamps each
+-- connection to the solution's count -- so there is no "mistake" wording.
+function BridgesScreen:describeHintStep(step, level)
+    if level == 1 then
+        return T(_("A bridge is missing between R%1C%2 and R%3C%4. Tap Hint again to build it."),
+                 step.r, step.c, step.r2, step.c2)
+    end
+    return T(_("Built the bridge between R%1C%2 and R%3C%4."), step.r, step.c, step.r2, step.c2)
+end
+
 function BridgesScreen:init()
     local state = self.plugin:loadState()
     local n     = self.plugin:getSetting("grid_n", 7)
@@ -124,6 +135,7 @@ function BridgesScreen:buildLayout()
         buttons = {
             {
                 { text = _("Check"), callback = function() self:onCheck() end },
+                { text = _("Hint"), callback = function() self:onHint() end },
                 { text = _("Reset"), callback = function() self:onReset() end },
             },
         },
