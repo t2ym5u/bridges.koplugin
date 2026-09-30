@@ -507,6 +507,63 @@ end
 -- Serialise / load
 -- ---------------------------------------------------------------------------
 
+-- ---------------------------------------------------------------------------
+-- Hints
+--
+-- The unit is a bridge between two islands, not a cell. Note that a wrong
+-- bridge cannot exist here: tapBridge() clamps each connection to the number
+-- the solution uses, so the player can only ever be *short* of bridges, never
+-- over. There is therefore no "mistake" branch -- unlike every other puzzle in
+-- the collection.
+local function bridgeSolutionCount(board, i1, i2)
+    for _, sb in ipairs(board.solution_bridges) do
+        if (sb.i1 == i1 and sb.i2 == i2) or (sb.i1 == i2 and sb.i2 == i1) then
+            return sb.count
+        end
+    end
+    return 0
+end
+
+function BridgesBoard:findHint()
+    for _, b in ipairs(self.bridges or {}) do
+        local want = bridgeSolutionCount(self, b.i1, b.i2)
+        if b.count < want then
+            local a, z = self.islands[b.i1], self.islands[b.i2]
+            if a and z then
+                return {
+                    kind = "fill", i1 = b.i1, i2 = b.i2, want = want,
+                    r = a.r, c = a.c, tag = b.i1 .. "-" .. b.i2,
+                    r2 = z.r, c2 = z.c,
+                }
+            end
+        end
+    end
+    return nil, "complete"
+end
+
+function BridgesBoard:applyHint(step)
+    if not step then return false end
+    -- tapBridge cycles 0 -> 1 -> 2 -> 0, clamped at the solution's count, so
+    -- tapping until the counts agree lands on the right number either way.
+    for _ = 1, 3 do
+        local cur
+        for _, b in ipairs(self.bridges) do
+            if b.i1 == step.i1 and b.i2 == step.i2 then cur = b.count break end
+        end
+        if cur == step.want then return true end
+        self:tapBridge(step.i1, step.i2)
+    end
+    return true
+end
+
+function BridgesBoard:getHintsUsed()
+    return self.hints_used or 0
+end
+
+function BridgesBoard:noteHintUsed()
+    self.hints_used = (self.hints_used or 0) + 1
+end
+
 function BridgesBoard:serialize()
     local isl_out = {}
     for i, isl in ipairs(self.islands) do

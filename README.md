@@ -13,6 +13,7 @@ Connect all islands with bridges. Each island's number indicates how many bridge
 ## Features
 
 - **Multiple grid sizes** — 7×7 up to 13×13
+- **Hint** — two taps, working in a bridge between two islands rather than cells
 - **Three difficulty levels** — Easy, Medium, Hard
 - **Double bridges** — tap twice for a double bridge
 - **Connectivity check** — highlights isolated island groups
