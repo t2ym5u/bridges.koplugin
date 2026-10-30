@@ -22,6 +22,7 @@ local C_GRID       = Blitbuffer.COLOR_GRAY_E
 local BridgesBoardWidget = InputContainer:extend{
     board      = nil,
     size_ratio = 0.82,
+    max_size   = nil,   -- side in pixels; overrides size_ratio when set
     onTapAction = nil,  -- function(r, c)
 }
 
@@ -32,14 +33,27 @@ function BridgesBoardWidget:init()
     local Screen = require("device").screen
     local min_dim = math.min(Screen:getWidth(), Screen:getHeight())
     self.size     = math.floor(min_dim * (self.size_ratio or 0.82))
+    if self.max_size then
+        self.size = math.max(n, math.floor(self.max_size))
+    end
     self.cell     = self.size / n
 
     -- Island radius ≈ 38% of cell, bridgeline width ≈ 6% of cell
     self.island_r  = math.max(4, math.floor(self.cell * 0.38))
     self.line_w    = math.max(2, math.floor(self.cell * 0.06))
 
-    -- Font for island numbers
-    local fsize = math.max(10, math.floor(self.cell * 0.38))
+    -- Font for island numbers: the largest whose digit fits inside the
+    -- island. Font:getFace scales its size by DPI, so a size derived from
+    -- pixels is divided back first; the fit is then measured, not assumed.
+    local scale = Screen:scaleBySize(1000) / 1000
+    local fit_w = self.island_r * 1.3
+    local fit_h = self.island_r * 1.1
+    local fsize = math.max(6, math.floor(self.island_r * 1.4 / scale))
+    while fsize > 6 do
+        local m = RenderText:sizeUtf8Text(0, math.huge, Font:getFace("cfont", fsize), "8", true, false)
+        if m.x <= fit_w and (m.y_top + m.y_bottom) <= fit_h then break end
+        fsize = fsize - 1
+    end
     self.num_face = Font:getFace("cfont", fsize)
 
     self.dimen      = Geom:new{ w = self.size, h = self.size }
@@ -175,9 +189,9 @@ function BridgesBoardWidget:paintTo(bb, x, y)
             label = tostring(isl.value)
         end
 
-        local m = RenderText:sizeUtf8Text(0, ir * 2, self.num_face, label, true, false)
+        local m = RenderText:sizeUtf8Text(0, math.huge, self.num_face, label, true, false)
         local tx = cx - math.floor(m.x / 2)
-        local ty = cy - math.floor((m.y_bottom - m.y_top) / 2)
+        local ty = cy + math.floor((m.y_top - m.y_bottom) / 2)
         RenderText:renderUtf8Text(bb, tx, ty, self.num_face, label, true, false, C_ISLAND_NUM)
     end
 end

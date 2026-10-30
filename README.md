@@ -33,7 +33,7 @@ Connect all islands with bridges. Each island's number indicates how many bridge
 | Draw / extend bridge | Tap between two islands |
 | Remove bridge | Tap to cycle back to none |
 | Check progress | Tap **Check** |
-| New puzzle | Tap **New** |
+| New puzzle | Tap **New game** |
 | Show rules | Tap **Rules** |
 
 ## License

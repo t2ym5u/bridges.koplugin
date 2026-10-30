@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-10-30
+
+### Changed
+- Redesigned play screen: the board fills the room the controls leave, with a
+  full-width Check/Hint/Reset bar.
+- The status line reads "7×7 · Hard · Islands: 3/14" and wraps in landscape
+  instead of being cut off.
+- Title-bar menu: "Size: 7×7" and "Difficulty: Hard" instead of "Grid: 7×7"
+  and "Diff: Hard".
+- Once the puzzle is solved, the action bar shows "New game" in place of its
+  buttons.
+
+### Fixed
+- Island numbers overflowed their circle on high-DPI screens (the size was
+  scaled by DPI twice); each one is now the largest that fits inside the
+  island.
+- An applied Hint no longer wipes the saved game (game-common saved it as
+  nil). When a hint fills the last cell, the status now shows the win message.
+
 ## [1.2.2] - 2026-10-07
 
 ### Fixed
