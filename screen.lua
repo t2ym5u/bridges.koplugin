@@ -14,7 +14,6 @@ local function lrequire_common(name)
     return package.loaded[key]
 end
 
-local ButtonTable     = require("ui/widget/buttontable")
 local Device          = require("device")
 local FrameContainer  = require("ui/widget/container/framecontainer")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
@@ -93,32 +92,7 @@ function BridgesScreen:serializeState()
 end
 
 function BridgesScreen:buildLayout()
-    local sw           = DeviceScreen:getWidth()
     local is_landscape = self:isLandscape()
-
-    self.board_widget = BridgesBoardWidget:new{
-        board       = self.board,
-        onTapAction = function(r, c) self:onTapCell(r, c) end,
-    }
-
-    local board_frame = FrameContainer:new{
-        padding = Size.padding.large,
-        margin  = Size.margin.default,
-        self.board_widget,
-    }
-
-    local board_frame_size  = self.board_widget.size + (Size.padding.large + Size.margin.default) * 2
-    local right_panel_width = sw - board_frame_size - Size.span.horizontal_default
-    local button_width = is_landscape
-        and math.max(right_panel_width - Size.span.horizontal_default, 100)
-        or  math.floor(sw * 0.9)
-
-    -- The status line can get long ("7×7 · Hard · 3/14 islands done"). In
-    -- portrait it sits directly alongside board_frame in the same
-    -- VerticalGroup, which centers each child against the widest one --
-    -- unbounded, a long status string overflows past the screen edge
-    -- instead of wrapping, getting cut off rather than centered.
-    self.status_text:setMaxWidth(is_landscape and button_width or board_frame_size)
 
     local title_bar = self:buildTitleBar(_("Bridges"), function()
         return {
@@ -129,40 +103,43 @@ function BridgesScreen:buildLayout()
         }
     end)
 
-    local bottom_buttons = ButtonTable:new{
-        shrink_unneeded_width = true,
-        width   = button_width,
-        buttons = {
-            {
-                { text = _("Check"), callback = function() self:onCheck() end },
-                { text = _("Hint"), callback = function() self:onHint() end },
-                { text = _("Reset"), callback = function() self:onReset() end },
-            },
-        },
+    self.status_text:setMaxWidth(self:getControlsWidth())
+    local controls = VerticalGroup:new{
+        align = "center",
+        self.status_text,
+        VerticalSpan:new{ width = Size.span.vertical_large },
+        self:buildActionBar({
+            { text = _("Check"), callback = function() self:onCheck() end },
+            { text = _("Hint"),  callback = function() self:onHint() end },
+            { text = _("Reset"), callback = function() self:onReset() end },
+        }),
+    }
+
+    local frame_pad   = Size.padding.large
+    local frame_extra = 2 * (frame_pad + Size.border.window)
+    local budget_w, budget_h = self:getBoardBudget(title_bar, controls)
+    self.board_widget = BridgesBoardWidget:new{
+        board       = self.board,
+        max_size    = math.min(budget_w, budget_h) - frame_extra,
+        onTapAction = function(r, c) self:onTapCell(r, c) end,
+    }
+    local board_frame = FrameContainer:new{
+        padding = frame_pad,
+        margin  = 0,
+        self.board_widget,
     }
 
     if is_landscape then
-        local right_panel = VerticalGroup:new{
-            align = "center",
-            self.status_text,
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            bottom_buttons,
-        }
         local content = HorizontalGroup:new{
             align = "center",
             board_frame,
-            HorizontalSpan:new{ width = Size.span.horizontal_default },
-            right_panel,
+            HorizontalSpan:new{ width = self:getGutter() },
+            controls,
         }
         self:buildLandscapeLayout(title_bar, content)
     else
-        local content = VerticalGroup:new{
-            align = "center",
-            board_frame,
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            self.status_text,
-        }
-        self:buildPortraitLayout(title_bar, content, bottom_buttons)
+        self:buildPortraitLayout(title_bar, board_frame,
+            VerticalGroup:new{ align = "center", controls, VerticalSpan:new{ width = self:getGutter() } })
     end
     self:updateStatus()
 end
@@ -271,7 +248,7 @@ function BridgesScreen:openGridMenu()
         sizes[#sizes+1] = { id = sz, text = sz .. "\xC3\x97" .. sz }
     end
     MenuHelper.openSizeMenu{
-        title     = _("Select grid size"),
+        title     = _("Select size"),
         sizes     = sizes,
         current   = self.plugin:getSetting("grid_n", 7),
         parent    = self,
@@ -315,20 +292,28 @@ function BridgesScreen:updateStatus(msg)
         end
         local diff  = self.plugin:getSetting("difficulty", "easy")
         local label = MenuHelper.DIFFICULTY_LABELS[diff] or diff
-        status = T(_("%1\xC3\x97%2 \xC2\xB7 %3 \xC2\xB7 %4/%5 islands done"),
-            self.board.n, self.board.n, label, sat, total)
+        status = self:joinStatus(
+            T("%1×%1", self.board.n),
+            label,
+            T(_("Islands: %1/%2"), sat, total))
     end
     ScreenBase.updateStatus(self, status)
+    -- Every move, hint, undo and reveal ends here, so the bar follows the board.
+    self:refreshActionBar()
+end
+
+function BridgesScreen:isRoundOver()
+    return self.board:checkWin()
 end
 
 function BridgesScreen:getGridButtonText()
-    return T(_("Grid: %1"), self.board.n .. "\xC3\x97" .. self.board.n)
+    return T(_("Size: %1"), self.board.n .. "\xC3\x97" .. self.board.n)
 end
 
 function BridgesScreen:getDiffButtonText()
     local diff  = self.plugin:getSetting("difficulty", "easy")
     local label = MenuHelper.DIFFICULTY_LABELS[diff] or diff
-    return T(_("Diff: %1"), label)
+    return T(_("Difficulty: %1"), label)
 end
 
 return BridgesScreen
