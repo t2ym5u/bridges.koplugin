@@ -12,11 +12,13 @@ Connect all islands with bridges. Each island's number indicates how many bridge
 
 ## Features
 
-- **Multiple grid sizes** — 7×7 up to 13×13
-- **Hint** — two taps, working in a bridge between two islands rather than cells
-- **Three difficulty levels** — Easy, Medium, Hard
+- **Multiple grid sizes** — 7×7, 9×9, 11×11
+- **Hint** — two taps, working on a bridge between two islands rather than a cell; a pair with too many bridges is fixed first
+- **Three difficulty levels** — Easy, Medium, Hard: more islands and harder
+  deductions at each level; every puzzle has exactly one solution and never
+  needs trial and error
 - **Double bridges** — tap twice for a double bridge
-- **Connectivity check** — highlights isolated island groups
+- **Check** — tells how many islands have their number of bridges
 - **Auto-save** — puzzle state saved and restored on next launch
 
 ## Installation
@@ -24,17 +26,17 @@ Connect all islands with bridges. Each island's number indicates how many bridge
 1. Download `bridges.koplugin.zip` from the [latest release](../../releases/latest).
 2. Extract into the `plugins/` folder of your KOReader data directory.
 3. Restart KOReader.
-4. Open the menu → **Tools** → **Bridges**.
+4. Open the menu → **Tools** → **Games** → **Bridges**.
 
 ## Controls
 
 | Action | How |
 |--------|-----|
-| Draw / extend bridge | Tap between two islands |
-| Remove bridge | Tap to cycle back to none |
+| Build / double / remove a bridge | Tap an island, then another island in the same row or column (0 → 1 → 2 → 0) |
 | Check progress | Tap **Check** |
-| New puzzle | Tap **New game** |
-| Show rules | Tap **Rules** |
+| Get a hint | Tap **Hint** |
+| Remove every bridge | Tap **Reset** |
+| New game, Daily Challenge, size, difficulty, rules | Menu (top left) |
 
 ## License
 

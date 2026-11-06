@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-11-05
+
+### Changed
+- You now choose where bridges go: any two islands that see each other can
+  be joined with 0, 1 or 2 bridges. Before, only the pairs of the solution
+  could be tapped, and never past the solution's count, which gave the
+  answer away.
+- Every puzzle now has exactly one solution under the stated rules (bridges
+  never cross, one connected network) and never needs trial and error. It
+  is checked by a solver that reasons like a player: Easy needs only the
+  island numbers, Medium also "two islands must not close themselves off"
+  (two 1s are never joined), Hard needs at least two steps about the whole
+  network. Levels now also differ in island count (7×7: 10 / 12 / 14).
+- A finished grid wins whenever it keeps the rules.
+- Hints also point out a pair with too many bridges and fix it.
+- A "Generating puzzle…" bar shows if a puzzle takes a moment to build.
+- Today's Daily Challenge puzzle changes once with this update.
+
+### Fixed
+- Puzzles were not reproducible: the generator reseeded itself from the
+  clock, so the Daily Challenge differed from one device to the next.
+- The generated solution often had crossing bridges, so almost no puzzle
+  could be solved by the rules (29 to 30 out of 30 per size and level).
+- Removed the fallback that could hand out a puzzle with several solutions.
+- A bridge can no longer be drawn across another one ("Bridges cannot
+  cross.").
+- Saves from earlier versions load and keep the bridges already placed; a
+  saved puzzle whose solution crosses itself still allows crossing bridges,
+  so it stays winnable.
+
 ## [1.4.5] - 2026-11-04
 
 ### Fixed
