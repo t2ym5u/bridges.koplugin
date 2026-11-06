@@ -9,5 +9,8 @@ return {
 
     -- Hints (screen.lua :describeHintStep) -- the unit is a bridge, not a cell.
     ["A bridge is missing between R%1C%2 and R%3C%4. Tap Hint again to build it."] = { fr = "Il manque un pont entre L%1C%2 et L%3C%4. Touchez à nouveau Astuce pour le construire.", es = "Falta un puente entre F%1C%2 y F%3C%4. Toque Pista otra vez para construirlo.", de = "Zwischen Z%1S%2 und Z%3S%4 fehlt eine Brücke. Tippen Sie erneut auf Tipp, um sie zu bauen." },
+    ["Too many bridges between R%1C%2 and R%3C%4. Tap Hint again to fix it."] = { fr = "Trop de ponts entre L%1C%2 et L%3C%4. Touchez à nouveau Astuce pour corriger.", es = "Demasiados puentes entre F%1C%2 y F%3C%4. Toque Pista otra vez para corregirlo.", de = "Zu viele Brücken zwischen Z%1S%2 und Z%3S%4. Tippen Sie erneut auf Tipp, um es zu korrigieren." },
+    ["Fixed the bridges between R%1C%2 and R%3C%4."] = { fr = "Ponts corrigés entre L%1C%2 et L%3C%4.", es = "Puentes corregidos entre F%1C%2 y F%3C%4.", de = "Brücken zwischen Z%1S%2 und Z%3S%4 korrigiert." },
+    ["Bridges cannot cross."] = { fr = "Les ponts ne peuvent pas se croiser.", es = "Los puentes no pueden cruzarse.", de = "Brücken dürfen sich nicht kreuzen." },
     ["Built the bridge between R%1C%2 and R%3C%4."] = { fr = "Pont construit entre L%1C%2 et L%3C%4.", es = "Puente construido entre F%1C%2 y F%3C%4.", de = "Brücke zwischen Z%1S%2 und Z%3S%4 gebaut." },
 }

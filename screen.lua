@@ -27,6 +27,7 @@ local T               = require("ffi/util").template
 
 local ScreenBase     = lrequire_common("screen_base")
 local MenuHelper     = lrequire_common("menu_helper")
+local GenProgress    = lrequire_common("gen_progress")
 local BridgesBoard   = lrequire("board")
 local BridgesBoardWidget = lrequire("board_widget")
 
@@ -67,9 +68,16 @@ Appuyez sur une île pour la sélectionner, puis sur une autre île de la même 
 local BridgesScreen = ScreenBase:extend{}
 
 -- The unit is a bridge between two islands, so a hint names both ends rather
--- than one cell. A wrong bridge cannot exist here -- tapBridge clamps each
--- connection to the solution's count -- so there is no "mistake" wording.
+-- than one cell. A "mistake" is a pair carrying more bridges than the
+-- solution (possibly a bridge that should not be there at all).
 function BridgesScreen:describeHintStep(step, level)
+    if step.kind == "mistake" then
+        if level == 1 then
+            return T(_("Too many bridges between R%1C%2 and R%3C%4. Tap Hint again to fix it."),
+                     step.r, step.c, step.r2, step.c2)
+        end
+        return T(_("Fixed the bridges between R%1C%2 and R%3C%4."), step.r, step.c, step.r2, step.c2)
+    end
     if level == 1 then
         return T(_("A bridge is missing between R%1C%2 and R%3C%4. Tap Hint again to build it."),
                  step.r, step.c, step.r2, step.c2)
@@ -82,7 +90,8 @@ function BridgesScreen:init()
     local n     = self.plugin:getSetting("grid_n", 7)
     self.board  = BridgesBoard:new{ n = n }
     if not self.board:load(state) then
-        self.board:generate(self.plugin:getSetting("difficulty", "easy"))
+        local diff = self.plugin:getSetting("difficulty", "easy")
+        GenProgress.run(function(on_progress) self.board:generate(diff, on_progress) end)
     end
     ScreenBase.init(self)
 end
@@ -189,8 +198,11 @@ function BridgesScreen:onTapCell(r, c)
     local sel = board.selected
     board.selected = nil
 
-    local changed = board:tapBridge(sel, tapped_idx)
-    if changed then
+    local changed, why = board:tapBridge(sel, tapped_idx)
+    if why == "cross" then
+        self.board_widget:refresh()
+        self:updateStatus(_("Bridges cannot cross."))
+    elseif changed then
         self.plugin:saveState(board:serialize())
         self.board_widget:refresh()
         if board:checkWin() then
@@ -210,7 +222,7 @@ function BridgesScreen:onNewGame()
     local diff = self.plugin:getSetting("difficulty", "easy")
     local n    = self.plugin:getSetting("grid_n", 7)
     self.board = BridgesBoard:new{ n = n }
-    self.board:generate(diff)
+    GenProgress.run(function(on_progress) self.board:generate(diff, on_progress) end)
     self.plugin:saveState(self.board:serialize())
     self:buildLayout()
     UIManager:setDirty(self, function() return "ui", self.dimen end)
